@@ -3,7 +3,7 @@
  * Handles all API requests with authentication
  */
 
-const API_BASE_URL = 'https://fanzones-backend.fanzones-backend-api.workers.dev';
+const API_BASE_URL = 'https://fanzones-backend.fanzones.workers.dev';
 
 // Token storage
 let accessToken = null;
