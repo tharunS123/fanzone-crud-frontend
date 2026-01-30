@@ -147,8 +147,8 @@ export async function getCurrentUser() {
     return response.json();
 }
 
-export async function getUsers(limit = 50, offset = 0) {
-    const response = await apiRequest(`/users?limit=${limit}&offset=${offset}`);
+export async function getUsers(limit = 50, offset = 0, showAll = false) {
+    const response = await apiRequest(`/users?limit=${limit}&offset=${offset}&showAll=${showAll}`);
 
     if (!response.ok) {
         throw new Error('Failed to fetch users');
@@ -206,6 +206,20 @@ export async function deleteUser(id) {
     return data;
 }
 
+export async function permanentDeleteUser(id) {
+    const response = await apiRequest(`/users/${id}/permanent`, {
+        method: 'DELETE',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to permanently delete user');
+    }
+
+    return data;
+}
+
 // Create user (uses register endpoint)
 export async function createUser(userData) {
     return register(userData);
@@ -221,6 +235,7 @@ export default {
     getUser,
     updateUser,
     deleteUser,
+    permanentDeleteUser,
     createUser,
     setTokens,
     clearTokens,

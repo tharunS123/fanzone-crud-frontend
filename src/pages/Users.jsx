@@ -8,11 +8,13 @@ function Users() {
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [pagination, setPagination] = useState({ limit: 10, offset: 0 });
+    const [activeTab, setActiveTab] = useState('active'); // 'all' or 'active'
 
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
     const { success, error: showError } = useToast();
@@ -20,8 +22,9 @@ function Users() {
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
+            const showAll = activeTab === 'all';
             const [usersData, statsData] = await Promise.all([
-                api.getUsers(pagination.limit, pagination.offset),
+                api.getUsers(pagination.limit, pagination.offset, showAll),
                 api.getUserCount()
             ]);
             setUsers(usersData.users);
@@ -32,7 +35,7 @@ function Users() {
         } finally {
             setIsLoading(false);
         }
-    }, [pagination, showError]);
+    }, [pagination, activeTab, showError]);
 
     useEffect(() => {
         fetchUsers();
@@ -48,6 +51,11 @@ function Users() {
         setShowDeleteModal(true);
     };
 
+    const handlePermanentDelete = (user) => {
+        setSelectedUser(user);
+        setShowPermanentDeleteModal(true);
+    };
+
     const confirmDelete = async () => {
         try {
             await api.deleteUser(selectedUser.id);
@@ -57,6 +65,18 @@ function Users() {
             fetchUsers();
         } catch (error) {
             showError(error.message || 'Failed to delete user');
+        }
+    };
+
+    const confirmPermanentDelete = async () => {
+        try {
+            await api.permanentDeleteUser(selectedUser.id);
+            success(`User "${selectedUser.username}" permanently deleted`);
+            setShowPermanentDeleteModal(false);
+            setSelectedUser(null);
+            fetchUsers();
+        } catch (error) {
+            showError(error.message || 'Failed to permanently delete user');
         }
     };
 
@@ -126,6 +146,46 @@ function Users() {
                 </button>
             </div>
 
+            {/* Tabs */}
+            <div style={{
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '16px',
+                borderBottom: '2px solid var(--border-color)',
+                paddingBottom: '0'
+            }}>
+                <button
+                    onClick={() => { setActiveTab('all'); setPagination(p => ({ ...p, offset: 0 })); }}
+                    style={{
+                        padding: '12px 20px',
+                        border: 'none',
+                        background: activeTab === 'all' ? 'var(--primary)' : 'transparent',
+                        color: activeTab === 'all' ? 'white' : 'var(--text-secondary)',
+                        borderRadius: '8px 8px 0 0',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    📊 All Users ({stats.total})
+                </button>
+                <button
+                    onClick={() => { setActiveTab('active'); setPagination(p => ({ ...p, offset: 0 })); }}
+                    style={{
+                        padding: '12px 20px',
+                        border: 'none',
+                        background: activeTab === 'active' ? 'var(--primary)' : 'transparent',
+                        color: activeTab === 'active' ? 'white' : 'var(--text-secondary)',
+                        borderRadius: '8px 8px 0 0',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    ✅ Active Users ({stats.active})
+                </button>
+            </div>
+
             {/* Users Table */}
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 {isLoading ? (
@@ -171,7 +231,11 @@ function Users() {
                                         </td>
                                         <td>{user.email}</td>
                                         <td>
-                                            <span className="badge badge-success">Active</span>
+                                            {user.is_active !== false ? (
+                                                <span className="badge badge-success">Active</span>
+                                            ) : (
+                                                <span className="badge" style={{ background: '#fee2e2', color: '#dc2626' }}>Inactive</span>
+                                            )}
                                         </td>
                                         <td>{formatDate(user.created_at)}</td>
                                         <td style={{ textAlign: 'right' }}>
@@ -187,6 +251,13 @@ function Users() {
                                                     onClick={() => handleDelete(user)}
                                                 >
                                                     🗑️ Delete
+                                                </button>
+                                                <button
+                                                    className="btn btn-ghost btn-sm"
+                                                    style={{ color: '#ef4444', fontWeight: '600' }}
+                                                    onClick={() => handlePermanentDelete(user)}
+                                                >
+                                                    ⚠️ Permanent
                                                 </button>
                                             </div>
                                         </td>
@@ -266,6 +337,47 @@ function Users() {
                             </button>
                             <button className="btn btn-danger" onClick={confirmDelete}>
                                 Delete User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Permanent Delete Confirmation Modal */}
+            {showPermanentDeleteModal && selectedUser && (
+                <div className="modal-overlay" onClick={() => setShowPermanentDeleteModal(false)}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header" style={{ background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)' }}>
+                            <h3 className="modal-title" style={{ color: 'white' }}>⚠️ Permanent Delete</h3>
+                            <button className="modal-close" style={{ color: 'white' }} onClick={() => setShowPermanentDeleteModal(false)}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div style={{
+                                background: '#fef2f2',
+                                border: '1px solid #fecaca',
+                                borderRadius: '8px',
+                                padding: '16px',
+                                marginBottom: '16px'
+                            }}>
+                                <p style={{ color: '#dc2626', fontWeight: '600', marginBottom: '8px' }}>
+                                    ⚠️ This action is IRREVERSIBLE!
+                                </p>
+                                <p style={{ color: '#7f1d1d', fontSize: '14px' }}>
+                                    The user and ALL related data (sessions, credentials, tokens) will be permanently removed from the database.
+                                </p>
+                            </div>
+                            <p>Are you sure you want to permanently delete <strong>{selectedUser.username}</strong>?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => setShowPermanentDeleteModal(false)}>
+                                Cancel
+                            </button>
+                            <button
+                                className="btn"
+                                style={{ background: '#dc2626', color: 'white' }}
+                                onClick={confirmPermanentDelete}
+                            >
+                                🗑️ Permanently Delete
                             </button>
                         </div>
                     </div>
