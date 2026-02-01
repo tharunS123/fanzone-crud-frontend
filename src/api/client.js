@@ -147,6 +147,16 @@ export async function getCurrentUser() {
     return response.json();
 }
 
+export async function getSecurityEvents(limit = 20) {
+    const response = await apiRequest(`/me/security?limit=${limit}`);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch security events');
+    }
+
+    return response.json();
+}
+
 export async function getUsers(limit = 50, offset = 0, showAll = false) {
     const response = await apiRequest(`/users?limit=${limit}&offset=${offset}&showAll=${showAll}`);
 
@@ -230,6 +240,7 @@ export default {
     register,
     logout,
     getCurrentUser,
+    getSecurityEvents,
     getUsers,
     getUserCount,
     getUser,

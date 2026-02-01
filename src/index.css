@@ -480,6 +480,10 @@ a:hover {
   animation: slideUp 0.3s ease;
 }
 
+.modal-lg {
+  max-width: 600px;
+}
+
 .modal-header {
   display: flex;
   align-items: center;

@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
+import ProfileModal from './ProfileModal';
 function Layout() {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     const getPageTitle = () => {
         switch (location.pathname) {
@@ -56,7 +58,14 @@ function Layout() {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <div className="sidebar-user">
+                    <div
+                        className="sidebar-user"
+                        onClick={() => setShowProfileModal(true)}
+                        style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-glass)'}
+                        title="View Profile"
+                    >
                         <div className="sidebar-user-avatar">
                             {getInitials(user)}
                         </div>
@@ -96,6 +105,14 @@ function Layout() {
                     <Outlet />
                 </div>
             </main>
+
+            {/* Profile Modal */}
+            {showProfileModal && (
+                <ProfileModal
+                    user={user}
+                    onClose={() => setShowProfileModal(false)}
+                />
+            )}
         </div>
     );
 }
