@@ -235,6 +235,30 @@ export async function createUser(userData) {
     return register(userData);
 }
 
+// ============ Events API ============
+
+export async function getEvents(params = {}) {
+    const queryParams = new URLSearchParams();
+
+    if (params.keyword) queryParams.append('keyword', params.keyword);
+    if (params.city) queryParams.append('city', params.city);
+    if (params.stateCode) queryParams.append('stateCode', params.stateCode);
+    if (params.segmentName) queryParams.append('segmentName', params.segmentName);
+    if (params.size) queryParams.append('size', params.size);
+    if (params.page) queryParams.append('page', params.page);
+
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/events?${queryString}` : '/events';
+
+    const response = await apiRequest(endpoint);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch events');
+    }
+
+    return response.json();
+}
+
 export default {
     login,
     register,
@@ -248,6 +272,7 @@ export default {
     deleteUser,
     permanentDeleteUser,
     createUser,
+    getEvents,
     setTokens,
     clearTokens,
     getAccessToken,

@@ -13,6 +13,8 @@ function Layout() {
                 return 'Dashboard';
             case '/users':
                 return 'User Management';
+            case '/events':
+                return 'Events List';
             default:
                 return 'FanZones Admin';
         }
@@ -53,6 +55,15 @@ function Layout() {
                         >
                             <span className="sidebar-nav-item-icon">👥</span>
                             Users
+                        </NavLink>
+                        <NavLink
+                            to="/events"
+                            className={({ isActive }) =>
+                                `sidebar-nav-item ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <span className="sidebar-nav-item-icon">🎫</span>
+                            List
                         </NavLink>
                     </div>
                 </nav>
