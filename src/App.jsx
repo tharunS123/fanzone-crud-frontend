@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Events from './pages/Events'
+import EventDetails from './pages/EventDetails'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/events" element={<Events />} />
+                <Route path="/events/:eventId" element={<EventDetails />} />
             </Route>
 
             {/* Default redirect */}
@@ -47,3 +49,4 @@ function App() {
 }
 
 export default App
+

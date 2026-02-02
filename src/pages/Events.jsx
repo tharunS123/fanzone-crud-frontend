@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/client';
 
 function Events() {
@@ -187,7 +188,11 @@ function Events() {
                             const venue = event._embedded?.venues?.[0];
 
                             return (
-                                <div key={event.id} className="event-card">
+                                <Link
+                                    key={event.id}
+                                    to={`/events/${event.id}`}
+                                    className="event-card event-card-link"
+                                >
                                     <div className="event-card-image">
                                         <img
                                             src={getEventImage(event)}
@@ -237,17 +242,13 @@ function Events() {
                                             </div>
                                         )}
 
-                                        <a
-                                            href={event.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="btn btn-primary btn-sm mt-md"
-                                            style={{ width: '100%' }}
-                                        >
-                                            🎟️ Get Tickets
-                                        </a>
+                                        <div className="event-card-actions">
+                                            <span className="btn btn-secondary btn-sm">
+                                                🗺️ View Details & Map
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             );
                         })}
                     </div>

@@ -3,7 +3,7 @@
  * Handles all API requests with authentication
  */
 
-const API_BASE_URL = 'https://fanzones-backend.fanzones.workers.dev';
+const API_BASE_URL = 'http://localhost:8787' //'https://fanzones-backend.fanzones.workers.dev';
 
 // Token storage
 let accessToken = null;
@@ -259,6 +259,19 @@ export async function getEvents(params = {}) {
     return response.json();
 }
 
+export async function getEventById(eventId) {
+    const response = await apiRequest(`/events/${eventId}`);
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error('Event not found');
+        }
+        throw new Error('Failed to fetch event');
+    }
+
+    return response.json();
+}
+
 export default {
     login,
     register,
@@ -273,8 +286,10 @@ export default {
     permanentDeleteUser,
     createUser,
     getEvents,
+    getEventById,
     setTokens,
     clearTokens,
     getAccessToken,
     getRefreshToken,
 };
+
